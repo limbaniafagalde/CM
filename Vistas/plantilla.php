@@ -54,6 +54,9 @@ if (isset($_SESSION["Ingresar"]) && $_SESSION["Ingresar"] == true) {
     elseif ($_SESSION["rol"] == "Paciente") {
       include "modulos/menuPaciente.php";
     }
+    elseif ($_SESSION["rol"] == "Doctor") {
+      include "modulos/menuDoctor.php";
+    }
 
     $url = array();
     if (isset($_GET["url"])) {
@@ -62,7 +65,8 @@ if (isset($_SESSION["Ingresar"]) && $_SESSION["Ingresar"] == true) {
        $url[0] == "perfil-S" || $url[0] == "consultorios" || $url[0] == "E-C" || 
        $url[0] == "doctores" || $url[0] == "pacientes" || $url[0] == "perfil-Paciente" ||
        $url[0] == "perfil-P" || $url[0] == "Ver-consultorios" || $url[0] == "Doctor" ||
-       $url[0] == "historial") { //cada modulo nuevo se agrega aqui
+       $url[0] == "historial" || $url[0] == "perfil-Doctor" || $url[0] == "perfil-D" ||
+       $url[0] == "Citas") { //cada modulo nuevo se agrega aqui
         include "modulos/".$url[0].".php";
       }
     }
@@ -71,7 +75,7 @@ if (isset($_SESSION["Ingresar"]) && $_SESSION["Ingresar"] == true) {
     }
 
     echo '</div>';  
-  }else if(isset($_GET["url"])){
+  }else if(isset($_GET["url"])){ //todavia no esta iniciado sesion
     if ($_GET["url"] == "seleccionar") {
       include "modulos/seleccionar.php";
     
@@ -80,6 +84,9 @@ if (isset($_SESSION["Ingresar"]) && $_SESSION["Ingresar"] == true) {
 
     }else if ($_GET["url"]=="ingreso-Paciente") { //la var get es la que pido en el archivo .htaccess
       include "modulos/ingreso-Paciente.php";  
+
+    }else if ($_GET["url"]=="ingreso-Doctor") { //la var get es la que pido en el archivo .htaccess
+      include "modulos/ingreso-Doctor.php";  
     }
 
   }else{
@@ -370,10 +377,44 @@ if (isset($_SESSION["Ingresar"]) && $_SESSION["Ingresar"] == true) {
                 end: "'.$value["fin"].'"
 
               },';
+            }elseif ($value["id_doctor"] == substr($_GET["url"], 6)) { //inicio de sesion como doctor
+              echo '{
+                id: '.$value["id"].',
+                title: "'.$value["nyaP"].'",
+                start: "'.$value["inicio"].'",
+                end: "'.$value["fin"].'"
+
+              },';
             }
           }
         ?>
       ],
+
+      <?php
+      
+        if ($_SESSION["rol"] == "Paciente") {
+          $columna = "id";
+          $valor = substr($_GET["url"], 7);
+
+          $resultado = DoctoresC::DoctorC($columna, $valor);
+
+          echo 'scrollTime: "'.$resultado["horarioE"].'",
+                minTime: "'.$resultado["horarioE"].'",
+                maxTime: "'.$resultado["horarioS"].'",';
+
+        }else if($_SESSION["rol"] == "Doctor"){
+          $columna = "id";
+          $valor = substr($_GET["url"], 6);
+
+          $resultado = DoctoresC::DoctorC($columna, $valor);
+
+          echo 'scrollTime: "'.$resultado["horarioE"].'",
+                minTime: "'.$resultado["horarioE"].'",
+                maxTime: "'.$resultado["horarioS"].'",';
+
+        }
+      
+      ?>
 
       dayClick:function(date, jsEvent, view){
         $('#CitaModal').modal();
